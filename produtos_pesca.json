@@ -1,0 +1,37 @@
+[
+  {
+    "_comment": "PLACEHOLDER — substitua TODO o conteúdo deste arquivo pelo dump real da coleção 'produtos' (80 documentos).",
+    "_como_gerar": "No MongoDB Compass: abra a coleção produtos -> Export Data -> Export Full Collection -> formato JSON. Ou via terminal: mongoexport --uri \"<MONGO_URI>\" --db loja_pesca --collection produtos --jsonArray --out produtos_pesca.json",
+    "_observacao": "Os dois objetos abaixo são apenas exemplos do formato esperado e devem ser apagados ao colar os documentos reais."
+  },
+  {
+    "id_estoque": "PROD-001",
+    "des_nome_item": "Linha Monofilamento Crystal",
+    "tp_categoria": "linha",
+    "des_marca": "Maruri",
+    "cod_sku": "LIN-MONO-0025",
+    "vlr_preco": 29.90,
+    "tp_moeda": "BRL",
+    "qtd_estoque": 150,
+    "tp_unidade": "rolo",
+    "qtd_min_alerta": 20,
+    "des_especificacoes": "bitola_mm: 0.25; resistencia_kg: 8.0; comprimento_m: 300",
+    "tp_situacao": "ativo",
+    "data_cadastro": "2024-01-10T08:00:00Z"
+  },
+  {
+    "id_estoque": "PROD-014",
+    "des_nome_item": "Carretilha Perfil Baixo 8 Rolamentos",
+    "tp_categoria": "carretilha",
+    "des_marca": "Shimano",
+    "cod_sku": "CAR-PB-0014",
+    "vlr_preco": 459.00,
+    "tp_moeda": "BRL",
+    "qtd_estoque": 8,
+    "tp_unidade": "unidade",
+    "qtd_min_alerta": 5,
+    "des_especificacoes": "rolamentos: 8; relacao_transmissao: 6.3:1; recolhimento_cm: 66; capacidade_freio_kg: 5",
+    "tp_situacao": "ativo",
+    "data_cadastro": "2024-02-05T10:30:00Z"
+  }
+]

@@ -1,0 +1,53 @@
+# ===== Credenciais e conexão (NUNCA versionar) =====
+.env
+.env.*
+!.env.example
+*.env
+config.py
+config.ini
+secrets.json
+credentials.json
+*.pem
+*.key
+
+# ===== Ambientes virtuais =====
+venv/
+.venv/
+env/
+ENV/
+virtualenv/
+
+# ===== Cache e artefatos do Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.installed.cfg
+
+# ===== Testes / cobertura =====
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ===== Jupyter =====
+.ipynb_checkpoints/
+
+# ===== IDEs e editores =====
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===== Sistema operacional =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Logs =====
+*.log
