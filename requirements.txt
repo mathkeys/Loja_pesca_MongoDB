@@ -1,0 +1,6 @@
+# Dependências do projeto — instale com: pip install -r requirements.txt
+
+pymongo[srv]==4.8.0     # driver do MongoDB (o extra [srv] habilita conexões mongodb+srv do Atlas)
+Flask==3.0.3            # framework web da rota GET
+python-dotenv==1.0.1   # carrega a MONGO_URI a partir do arquivo .env
+Flask-Cors==4.0.1      # libera o acesso do front-end ao backend (CORS)
