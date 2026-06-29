@@ -118,7 +118,7 @@ def atualizar_estoque(id_estoque: str, value_update: dict):
     Exemplo: baixa de estoque após uma venda.
     """
     resultado = colecao.update_one(
-        {"id_estoque": id_estoque},
+        {"id_estoque": id_estoque}, 
         {"$set": value_update},
     )
     return resultado.modified_count
@@ -142,8 +142,12 @@ def rota_criar_produto():
 
 
 @app.route("/produtos/<id_estoque>", methods=["PUT"])
-def rota_atualizar_produto(id_estoque, colunas_valores):
+def rota_atualizar_produto(id_estoque):
     dados = request.get_json(force=True)
+
+    if "_id" in dados:
+        del dados["_id"]
+
     alterados = atualizar_estoque(id_estoque, dados)
     return jsonify({"modified_count": alterados})
 
