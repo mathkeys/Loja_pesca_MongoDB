@@ -11,6 +11,9 @@ O diferencial do modelo é o campo flexível `des_especificacoes`, que armazena 
 - **Python** — linguagem do backend
 - **PyMongo** — driver oficial para conexão entre Python e MongoDB
 - **Flask** — framework web que expõe a rota GET de consulta dos produtos
+- **HTML5 & CSS3** — estruturação e estilização da interface (design responsivo e dark theme nativo, sem dependência de bibliotecas externas).
+* **JavaScript (Vanilla)** — lógica de interface e manipulação do DOM.
+* **Fetch API** — recurso nativo do JavaScript utilizado para realizar as requisições assíncronas (HTTP GET, POST, PUT, DELETE) conectando o front-end à API Flask.
 
 ## Estrutura do banco
 
