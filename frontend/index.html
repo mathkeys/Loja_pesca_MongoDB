@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estoque — Loja de Pesca</title>
+<style>
+:root{
+  --bg:#0f1419; --panel:#161d24; --panel2:#1b242d; --line:#26323d; --txt:#e6edf3;
+  --mut:#8b9aa7; --acc:#2dd4a7; --warn:#e0a93b; --danger:#e06c6c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);
+  padding:28px 18px;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-size:22px;font-weight:700;margin-bottom:4px}
+.sub{font-size:13px;color:var(--mut);margin-bottom:22px}
+.sub code{color:var(--acc)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;align-items:stretch}
+input,select,textarea{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:9px 12px;color:var(--txt);font-size:14px;outline:none;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:var(--acc)}
+#q{flex:1;min-width:180px}
+.chk{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--mut);
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:0 12px;cursor:pointer}
+.chk input{padding:0}
+.btn{background:var(--acc);color:#04130d;border:none;border-radius:8px;padding:9px 16px;
+  font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}
+.btn.sec{background:transparent;border:1px solid var(--line);color:var(--mut);font-weight:500}
+.btn.sec:hover{color:var(--txt);border-color:var(--mut)}
+.btn.dng{background:transparent;border:1px solid var(--danger);color:var(--danger)}
+.btn.dng:hover{background:var(--danger);color:#fff}
+.count{font-size:12.5px;color:var(--mut);margin:14px 0 10px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;padding:9px 10px;color:var(--mut);font-weight:600;font-size:12px;
+  text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--line);white-space:nowrap}
+th[data-s]{cursor:pointer}th[data-s]:hover{color:var(--txt)}
+td{padding:10px;border-bottom:1px solid #1c252e;vertical-align:top}
+tr:hover td{background:var(--panel)}
+.nm{font-weight:600}
+.sku{font-size:11px;color:var(--mut);font-family:monospace}
+.cat{font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:var(--acc)}
+.price{font-family:monospace;white-space:nowrap}
+.qtd{font-family:monospace}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:5px;font-weight:600}
+.t-ok{background:rgba(45,212,167,.12);color:var(--acc)}
+.t-low{background:rgba(224,169,59,.14);color:var(--warn)}
+.t-off{background:rgba(224,108,108,.12);color:var(--danger)}
+.right{text-align:right}
+.acts{display:flex;gap:6px;justify-content:flex-end}
+.ic{background:var(--panel2);border:1px solid var(--line);color:var(--mut);border-radius:6px;
+  padding:5px 9px;font-size:12px;cursor:pointer}
+.ic:hover{color:var(--txt);border-color:var(--acc)}
+.ic.d:hover{border-color:var(--danger);color:var(--danger)}
+.empty{text-align:center;padding:40px;color:var(--mut)}
+footer{margin-top:26px;font-size:11.5px;color:#5d6b76;line-height:1.7}
+
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(6,10,14,.78);display:none;align-items:flex-start;
+  justify-content:center;padding:34px 16px;overflow:auto;z-index:10}
+.ov.show{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:100%;max-width:560px;padding:24px}
+.modal h2{font-size:18px;margin-bottom:2px}
+.modal .mh{font-size:12px;color:var(--mut);margin-bottom:18px;font-family:monospace}
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%}
+.fg textarea{font-family:monospace;font-size:12.5px;resize:vertical;min-height:54px}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+.foot{display:flex;gap:10px;margin-top:20px}
+.foot .btn{flex:1}
+.err{color:var(--danger);font-size:12px;margin-top:8px;display:none}
+@media(max-width:640px){.r3{grid-template-columns:1fr}.acts{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Controle de Estoque — Loja de Pesca</h1>
+  <div class="sub">Coleção <code>produtos</code> · banco <code>loja_pesca</code> (MongoDB) — <span id="total"></span> documentos, 7 categorias.</div>
+
+  <div class="bar">
+    <input id="q" placeholder="Buscar por nome, marca ou SKU…">
+    <select id="cat"><option value="">Todas as categorias</option></select>
+    <select id="sit"><option value="">Ativos e inativos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select>
+    <label class="chk"><input type="checkbox" id="rep"> Só repor</label>
+    <button class="btn" id="add">+ Adicionar</button>
+  </div>
+
+  <div class="count" id="count"></div>
+
+  <table>
+    <thead><tr>
+      <th data-s="des_nome_item">Produto</th>
+      <th data-s="tp_categoria">Categoria</th>
+      <th data-s="des_marca">Marca</th>
+      <th data-s="vlr_preco" class="right">Preço</th>
+      <th data-s="qtd_estoque" class="right">Estoque</th>
+      <th>Situação</th>
+      <th class="right">Ações</th>
+    </tr></thead>
+    <tbody id="body"></tbody>
+  </table>
+
+  <footer>
+    Reposição = estoque ≤ mínimo de alerta.<br>
+    Matheus Santos Chaves de Almeida & Leonardo Nunes — Banco de Dados Avançado · Unilasalle · jun/2026.
+  </footer>
+</div>
+
+<div class="ov" id="ov">
+  <div class="modal">
+    <h2 id="mTitle">Adicionar produto</h2>
+    <div class="mh" id="mSub">Inserir documento na coleção</div>
+    <div class="fg"><label>Nome do item</label><input id="f_nome"></div>
+    <div class="r2">
+      <div class="fg"><label>Categoria</label><select id="f_cat"></select></div>
+      <div class="fg"><label>Marca</label><input id="f_marca"></div>
+    </div>
+    <div class="r3">
+      <div class="fg"><label>SKU</label><input id="f_sku"></div>
+      <div class="fg"><label>ID estoque</label><input id="f_id" placeholder="PROD-0XX"></div>
+      <div class="fg"><label>Situação</label><select id="f_sit"><option value="ativo">ativo</option><option value="inativo">inativo</option></select></div>
+    </div>
+    <div class="r3">
+      <div class="fg"><label>Preço (R$)</label><input id="f_preco" type="number" step="0.01"></div>
+      <div class="fg"><label>Estoque</label><input id="f_qtd" type="number"></div>
+      <div class="fg"><label>Mín. alerta</label><input id="f_min" type="number"></div>
+    </div>
+    <div class="r2">
+      <div class="fg"><label>Unidade</label><input id="f_un" placeholder="unidade, rolo, kg…"></div>
+      <div class="fg"><label>Moeda</label><input id="f_moeda" value="BRL"></div>
+    </div>
+    <div class="fg"><label>Descrição (des_item)</label><textarea id="f_desc"></textarea></div>
+    <div class="fg"><label>Especificações (campo: valor; campo: valor)</label><textarea id="f_spec" placeholder="bitola_mm: 0.25; resistencia_kg: 8.0"></textarea></div>
+    <div class="fg"><label>Tags (separadas por vírgula)</label><input id="f_tag"></div>
+    <div class="err" id="mErr"></div>
+    <div class="foot">
+      <button class="btn sec" id="mCancel">Cancelar</button>
+      <button class="btn" id="mSave">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Configuração da sua API Flask
+const API_URL = 'http://localhost:5000/produtos';
+let DATA = [];
+
+const CATLAB = {linha:'Linha',isca:'Isca',carretilha:'Carretilha',vara:'Vara',acessorio:'Acessório',anzol:'Anzol',rede:'Rede'};
+const CATS = ['linha','isca','carretilha','vara','acessorio','anzol','rede'];
+const fmt = v => 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2});
+const low = p => p.qtd_estoque <= p.qtd_min_alerta;
+const $ = id => document.getElementById(id);
+let st = {q:'',cat:'',sit:'',rep:false,sort:'des_nome_item',dir:1};
+let editId = null;
+
+// Preencher selects de categoria
+CATS.forEach(c => {
+  $('cat').insertAdjacentHTML('beforeend',`<option value="${c}">${CATLAB[c]}</option>`);
+  $('f_cat').insertAdjacentHTML('beforeend',`<option value="${c}">${CATLAB[c]}</option>`);
+});
+
+// Funções para converter Especificações (String <-> JSON)
+function parseSpecs(str) {
+  if (!str) return {};
+  return str.split(';').reduce((acc, curr) => {
+    let parts = curr.split(':');
+    if (parts.length === 2) {
+      let key = parts[0].trim();
+      let val = parts[1].trim();
+      acc[key] = isNaN(val) ? val : Number(val);
+    }
+    return acc;
+  }, {});
+}
+
+function stringifySpecs(obj) {
+  if (!obj || typeof obj !== 'object') return '';
+  return Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join('; ');
+}
+
+// 1. READ (GET) - Buscar do Flask
+async function carregarDoBanco() {
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error('Erro na rede');
+    DATA = await res.json();
+    render();
+  } catch (err) {
+    console.error(err);
+    $('body').innerHTML = '<tr><td colspan="7" class="empty" style="color:var(--danger)">Erro ao conectar com a API Flask. Verifique se o backend está rodando.</td></tr>';
+  }
+}
+
+function render() {
+  $('total').textContent = DATA.length;
+  let r = DATA.filter(p => {
+    if(st.cat && p.tp_categoria !== st.cat) return false;
+    if(st.sit && p.tp_situacao !== st.sit) return false;
+    if(st.rep && !(low(p) && p.tp_situacao === 'ativo')) return false;
+    if(st.q) {
+      const t = (p.des_nome_item+' '+p.des_marca+' '+p.cod_sku).toLowerCase();
+      if(!t.includes(st.q.toLowerCase())) return false;
+    }
+    return true;
+  });
+  
+  r.sort((a,b) => {
+    let x = a[st.sort], y = b[st.sort];
+    if(typeof x === 'string') return x.localeCompare(y) * st.dir;
+    return (x - y) * st.dir;
+  });
+  
+  $('count').textContent = r.length + ' ' + (r.length === 1 ? 'produto' : 'produtos');
+  
+  $('body').innerHTML = r.length ? r.map(p => {
+    let badge = p.tp_situacao === 'inativo' ? '<span class="tag t-off">Inativo</span>'
+      : low(p) ? '<span class="tag t-low">Repor</span>' : '<span class="tag t-ok">OK</span>';
+    return `<tr>
+      <td><div class="nm">${p.des_nome_item}</div><div class="sku">${p.cod_sku} · ${p.id_estoque}</div></td>
+      <td><span class="cat">${CATLAB[p.tp_categoria] || p.tp_categoria}</span></td>
+      <td>${p.des_marca}</td>
+      <td class="right price">${fmt(p.vlr_preco)}</td>
+      <td class="right qtd">${p.qtd_estoque} <span style="color:var(--mut);font-size:11px">/ ${p.qtd_min_alerta}</span></td>
+      <td>${badge}</td>
+      <td><div class="acts"><button class="ic" data-ed="${p.id_estoque}">Editar</button><button class="ic d" data-del="${p.id_estoque}">Excluir</button></div></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7" class="empty">Nenhum produto encontrado.</td></tr>';
+
+  document.querySelectorAll('[data-ed]').forEach(b => b.onclick = () => openModal(b.dataset.ed));
+  document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => deletar(b.dataset.del));
+}
+
+function openModal(id) {
+  editId = id || null;
+  $('mErr').style.display = 'none';
+  if (id) {
+    const p = DATA.find(x => x.id_estoque === id);
+    $('mTitle').textContent = 'Editar produto';
+    $('mSub').textContent = 'Atualizar documento · ' + id;
+    $('f_nome').value = p.des_nome_item; $('f_cat').value = p.tp_categoria; $('f_marca').value = p.des_marca;
+    $('f_sku').value = p.cod_sku; $('f_id').value = p.id_estoque; $('f_id').disabled = true; $('f_sit').value = p.tp_situacao;
+    $('f_preco').value = p.vlr_preco; $('f_qtd').value = p.qtd_estoque; $('f_min').value = p.qtd_min_alerta;
+    $('f_un').value = p.tp_unidade; $('f_moeda').value = p.tp_moeda || 'BRL'; $('f_desc').value = p.des_item || '';
+    
+    // Converte o objeto de especificações do Mongo de volta para String no Form
+    $('f_spec').value = typeof p.des_especificacoes === 'object' ? stringifySpecs(p.des_especificacoes) : (p.des_especificacoes || '');
+    $('f_tag').value = Array.isArray(p.des_tag) ? p.des_tag.join(', ') : (p.des_tag || '');
+  } else {
+    $('mTitle').textContent = 'Adicionar produto';
+    $('mSub').textContent = 'Inserir documento na coleção';
+    ['f_nome','f_marca','f_sku','f_desc','f_spec','f_tag'].forEach(k => $(k).value = '');
+    $('f_cat').value = 'isca'; $('f_sit').value = 'ativo'; $('f_moeda').value = 'BRL';
+    $('f_preco').value = ''; $('f_qtd').value = ''; $('f_min').value = ''; $('f_un').value = '';
+    $('f_id').value = 'PROD-' + Date.now().toString().slice(-4); // Gerador provisório de ID
+    $('f_id').disabled = false;
+  }
+  $('ov').classList.add('show');
+}
+
+function close_() { $('ov').classList.remove('show'); }
+
+// 2. CREATE/UPDATE (POST/PUT) - Enviar para o Flask
+async function save() {
+  const nome = $('f_nome').value.trim();
+  const sku = $('f_sku').value.trim();
+  const id = $('f_id').value.trim();
+  
+  if(!nome) return showErr('Informe o nome do item.');
+  if(!sku) return showErr('Informe o SKU.');
+  if(!id) return showErr('Informe o ID de estoque.');
+
+  // Prepara o objeto com as tipagens corretas para o MongoDB
+  const obj = {
+    id_estoque: id,
+    des_nome_item: nome,
+    tp_categoria: $('f_cat').value,
+    des_marca: $('f_marca').value.trim(),
+    cod_sku: sku,
+    des_item: $('f_desc').value.trim(),
+    vlr_preco: parseFloat($('f_preco').value) || 0,
+    tp_moeda: $('f_moeda').value.trim() || 'BRL',
+    qtd_estoque: parseInt($('f_qtd').value) || 0,
+    tp_unidade: $('f_un').value.trim() || 'unidade',
+    qtd_min_alerta: parseInt($('f_min').value) || 0,
+    des_especificacoes: parseSpecs($('f_spec').value.trim()), // Transforma em JSON real
+    tp_situacao: $('f_sit').value,
+    des_tag: $('f_tag').value.split(',').map(t => t.trim()).filter(t => t), // Array de tags
+  };
+
+  const metodo = editId ? 'PUT' : 'POST';
+  const urlDestino = editId ? `${API_URL}/${editId}` : API_URL;
+
+  try {
+    const btn = $('mSave');
+    btn.textContent = 'Salvando...';
+    btn.disabled = true;
+
+    const res = await fetch(urlDestino, {
+      method: metodo,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(obj)
+    });
+
+    if (!res.ok) throw new Error('Falha ao salvar no banco');
+    
+    close_();
+    await carregarDoBanco(); // Atualiza a tabela após salvar
+  } catch (err) {
+    showErr(err.message);
+  } finally {
+    const btn = $('mSave');
+    btn.textContent = 'Salvar';
+    btn.disabled = false;
+  }
+}
+
+function showErr(m) {
+  const e = $('mErr');
+  e.textContent = m;
+  e.style.display = 'block';
+}
+
+// 3. DELETE (Excluir do Flask)
+async function deletar(id) {
+  const p = DATA.find(x => x.id_estoque === id);
+  if (!confirm(`Excluir "${p.des_nome_item}" do banco de dados?`)) return;
+
+  try {
+    const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Falha ao excluir');
+    
+    await carregarDoBanco(); // Recarrega os dados para tirar o item da tela
+  } catch (err) {
+    alert("Erro ao excluir: " + err.message);
+  }
+}
+
+// Eventos e inicialização
+$('q').oninput = e => { st.q = e.target.value; render(); };
+$('cat').onchange = e => { st.cat = e.target.value; render(); };
+$('sit').onchange = e => { st.sit = e.target.value; render(); };
+$('rep').onchange = e => { st.rep = e.target.checked; render(); };
+$('add').onclick = () => openModal(null);
+$('mCancel').onclick = close_;
+$('mSave').onclick = save;
+$('ov').onclick = e => { if (e.target.id === 'ov') close_(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') close_(); });
+
+document.querySelectorAll('th[data-s]').forEach(th => th.onclick = () => {
+  const s = th.dataset.s;
+  if (st.sort === s) st.dir *= -1; else { st.sort = s; st.dir = 1; }
+  render();
+});
+
+// Inicializa buscando os dados do Flask assim que a tela abre
+document.addEventListener('DOMContentLoaded', carregarDoBanco);
+</script>
+</body>
+</html>
