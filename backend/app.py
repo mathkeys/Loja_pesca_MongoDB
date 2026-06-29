@@ -65,16 +65,8 @@ def listar_produtos():
 
     Aceita filtros opcionais via query string, por exemplo:
         GET /produtos                      -> todos os produtos
-        GET /produtos?categoria=isca       -> apenas a categoria informada
-        GET /produtos?situacao=ativo       -> apenas itens ativos
     """
     filtro = {}
-    categoria = request.args.get("categoria")
-    situacao = request.args.get("situacao")
-    if categoria:
-        filtro["tp_categoria"] = categoria
-    if situacao:
-        filtro["tp_situacao"] = situacao
 
     produtos = list(colecao.find(filtro))
     return _json(produtos)
@@ -120,14 +112,14 @@ def buscar_produtos(filtro: dict):
     return list(colecao.find(filtro))
 
 
-def atualizar_estoque(id_estoque: str, nova_quantidade: int):
+def atualizar_estoque(id_estoque: str, value_update: dict):
     """UPDATE — altera apenas os campos indicados com $set (update_one).
 
     Exemplo: baixa de estoque após uma venda.
     """
     resultado = colecao.update_one(
         {"id_estoque": id_estoque},
-        {"$set": {"qtd_estoque": nova_quantidade}},
+        {"$set": value_update},
     )
     return resultado.modified_count
 
@@ -150,10 +142,9 @@ def rota_criar_produto():
 
 
 @app.route("/produtos/<id_estoque>", methods=["PUT"])
-def rota_atualizar_produto(id_estoque):
+def rota_atualizar_produto(id_estoque, colunas_valores):
     dados = request.get_json(force=True)
-    nova_qtd = dados.get("qtd_estoque")
-    alterados = atualizar_estoque(id_estoque, nova_qtd)
+    alterados = atualizar_estoque(id_estoque, dados)
     return jsonify({"modified_count": alterados})
 
 
